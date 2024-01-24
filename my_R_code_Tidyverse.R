@@ -36,9 +36,82 @@ surveys%>%
 surveys%>%
   filter(!is.na(weight)) %>%
   mutate(weight_kg=weight/1000, weight_lb=weight_kg*2.2)%>%
-  head()
+  view()
+
+#######  to check if there are differences in wt between  male and female species 
+# split-apply-combine-paradigm used to for this 
+surveys%>%
+filter(!is.na(sex))%>%
+group_by(sex) %>%
+  summarise(mean_weight=mean(weight, na.rm=T)) # removes nas in sex 
+
+or 
+
+surveys%>%
+  filter(!is.na(weight))%>%
+  group_by(sex) %>%
+  summarise(mean_weight=mean(weight))
+####### calculate mean using sex and species id
+surveys%>%
+  filter(!is.na(weight))%>%
+  group_by(sex, species_id) %>%
+  summarise(mean_weight=mean(weight, na.rm=T))
+
+###### print 15 lines
+surveys%>%
+  filter(!is.na(weight), !is.na(sex))%>%
+  group_by(sex, species_id) %>%
+  summarise(mean_weight=mean(weight, na.rm=T))%>%
+  print(n=15)
+
+############ used to arrange in descendiong order 
+surveys%>%
+  filter(!is.na(weight), !is.na(sex))%>%
+  group_by(sex, species_id) %>%
+  summarise(mean_weight=mean(weight, na.rm=T), min_weight=min(weight))%>%
+  arrange(desc(min_weight))
+############ used to arrange in ascending order 
+surveys%>%
+  filter(!is.na(weight), !is.na(sex))%>%
+  group_by(sex, species_id) %>%
+  summarise(mean_weight=mean(weight, na.rm=T), min_weight=min(weight))%>%
+  arrange(min_weight)
 
 
+######### the count function 
+surveys%>%
+  count(sex, species)
+
+##### arrange the data in descending order 
+surveys%>%
+  count(sex, species) %>%
+  arrange(species, desc(n))
+
+####### challenges how many animals were caught in the animal in each plot type 
+surveys%>%
+  count(plot_type)
+
+####### challenges2 use group_by and summarise to commpute mean ,min and max of each speciciesusing species_id
+surveys%>%
+  filter(!is.na(hindfoot_length))%>%
+  group_by(species) %>%
+  summarize (
+    mean_hindfoot_length = mean(hindfoot_length, na.rm=T), 
+    min_hindfoot_length= min(hindfoot_length), 
+    max_hindfoot_length= max(hindfoot_length),
+    n=n()) %>%
+  view()
+
+####### challenges what is thew heaviest animal (year, genus, species,_id, and weight)
+
+surveys%>%
+  filter(!is.na(weight))%>%
+  group_by(year) %>%
+  filter(weight==max(weight)) %>%
+  select(year, genus, species_id, weight) %>%
+  arrange(year)%>%
+  unique()
+  
 
 
 
