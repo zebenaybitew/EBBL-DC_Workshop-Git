@@ -103,7 +103,7 @@ plot(sex)
 levels(sex) [1:2]<-c("female","male")
 plot(sex)
 
-sex<-factor(sex, levels=c("undetermined","female" , "male"))
+sex<-factor(sex, levels=c("undetermined","female" , "male")) # used to rearrange the order of the levels or charcters 
 
 plot(sex)
 
