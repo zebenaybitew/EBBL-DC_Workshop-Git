@@ -42,6 +42,6 @@ my_function <-function(x) {
 my_result<-my_function(3)
 
 
-This code is just for practice 
+#This code is just for practice 
 
 
