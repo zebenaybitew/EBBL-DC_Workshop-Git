@@ -87,11 +87,11 @@ surveys%>%
   count(sex, species) %>%
   arrange(species, desc(n))
 
-####### challenges how many animals were caught in the animal in each plot type 
+####### challenge 1: how many animals were caught in the animal in each plot type 
 surveys%>%
   count(plot_type)
 
-####### challenges2 use group_by and summarise to commpute mean ,min and max of each speciciesusing species_id
+####### challenges2: use group_by and summarise to commpute mean ,min and max of each speciciesusing species_id
 surveys%>%
   filter(!is.na(hindfoot_length))%>%
   group_by(species) %>%
@@ -102,7 +102,7 @@ surveys%>%
     n=n()) %>%
   view()
 
-####### challenges what is thew heaviest animal (year, genus, species,_id, and weight)
+####### challenge3: what is thew heaviest animal (year, genus, species,_id, and weight)
 
 surveys%>%
   filter(!is.na(weight))%>%
@@ -110,8 +110,52 @@ surveys%>%
   filter(weight==max(weight)) %>%
   select(year, genus, species_id, weight) %>%
   arrange(year)%>%
-  unique()
+  unique() # used to remove repeated files
+
+#########  comapre mean among groups of data using a wider data frame 
+ 
+surveys_gw<-surveys %>%
+  filter(!is.na(weight)) %>%
+  group_by(plot_id, genus) %>%
+  summarize(mean_weight=mean(weight)) %>% 
+ view()
+
+surveys_gw %>%
+  pivot_wider(names_from = genus, values_from = mean_weight, values_fill = 0)
+
+######### how to go from wide to long format, the opposite of the above fucntion 
+survey_wide<-surveys_gw %>%
+  pivot_wider(names_from = genus, values_from = mean_weight, values_fill = 0)
+
+Survey_long<-survey_wide %>% 
+  pivot_longer(names_to =  "genus", values_to = "mean_weight", cols = -plot_id)
   
+str(Survey_long)
+
+
+######## challenges plot mean values of hindfoot_length and weight and the diffrences in measurements in each year using
+#pivot_longer function
+
+surves_long<-surveys %>%
+  pivot_longer(names_to =  "measurement", values_to = "value", cols = c(hindfoot_length, weight))
+
+######## challenge2 calculate the avaregae of each measurement for each year based on plot type 
+
+surves_long %>%
+  group_by(year, measurement, plot_type) %>%
+  summarize(mean_value=mean(value, na.rm = T)) %>% 
+  pivot_wider(names_from = measurement, values_from = mean_value)
+
+
+########  exporting data
+surveys_complete<-surveys %>% 
+  filter(!is.na(weight),
+         !is.na(hindfoot_length),
+         !is.na(sex))
+write_csv(surveys_complete, file = "data_raw/surveys_complete.csv")
+
+
+
 
 
 
