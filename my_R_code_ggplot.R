@@ -155,37 +155,38 @@ surveys_complete %>%
   geom_line() +
   facet_wrap(facets = vars(genus)) +
   theme_bw(base_size = 18)
-#########
-plt<-surveys_complete %>% 
-  count(year, genus, sex) %>% 
-  ggplot(
-    mapping = aes(
-      x=year, 
-      y=n, 
-      color=sex)) +
-  geom_line() +
-  facet_wrap(facets = vars(genus)) +
-  scale_color_manual(
-    values = c("tomato", "dodgerblue"),
-    labels= c("female", "male"),
-    name="Sex") +
-  xlab("year of observation") +
-  ylab("number of individulas") +
-  ggtitle("Observed genera over the time")
-  theme_bw(base_size = 14) +
-    theme(
-      legend.position="bottom", 
-      aspect.ratio=1, 
-      axis.text.x=element_text(
-        angle=45, 
-        hjust=1
-      ),
-      plot.title = element_text(hjust = 0.5),
-      panel.grid=element_blank(), 
-      strip.background = element_blank()
-         )
+########
+# Our last super complicated plot
+ plt <- surveys_complete %>%
+   count(year, genus, sex) %>%
+   ggplot(
+     mapping = aes(
+       x=year,
+       y=n,
+       color = sex)) +
+   geom_line() +
+   facet_wrap(facet= vars(genus),
+              scales = "free"
+   ) +
+   scale_color_manual(values = c("tomato", "dodgerblue"),
+                      labels = c("female", "male"),
+                      name = "Sex") +
+   xlab("Years of observation") +
+   ylab("Number of individuals") +
+   ggtitle("Observed genera over time") +
+   theme_bw(base_size = 14) +
+   theme(
+     legend.position = "bottom", 
+     aspect.ratio = 1,
+     axis.text.x = element_text(angle = 45,
+                                hjust = 1),
+     plot.title = element_text(hjust = 0.5),
+     panel.grid = element_blank(),
+     strip.background =  element_blank()
+   )
  plt
-####### 
+ 
+  ####### 
 ggsave(filename = "data/plot.pdf", plot = plt, width = 20, height = 20)
 
 
