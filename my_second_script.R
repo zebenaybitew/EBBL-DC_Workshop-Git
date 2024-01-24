@@ -72,4 +72,5 @@ median(heights_no_na) # used to calculate the median
 heights_no_na[heights_no_na>67] # used to choose people greater that height 67 inches 
 
 length (heights_no_na[heights_no_na>67]) # is use to count the number of values 
+sdvv
 
