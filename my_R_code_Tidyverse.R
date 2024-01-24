@@ -27,3 +27,18 @@ surveys %>%
   filter(year<1995) %>%
   select(year, sex, weight)
 
+##### the mutate function to create new columns in data 
+
+surveys%>%
+  mutate(weight_kg=weight/1000, weight_lb=weight_kg*2.2)%>%
+  view()
+##### remove nas
+surveys%>%
+  filter(!is.na(weight)) %>%
+  mutate(weight_kg=weight/1000, weight_lb=weight_kg*2.2)%>%
+  head()
+
+
+
+
+
