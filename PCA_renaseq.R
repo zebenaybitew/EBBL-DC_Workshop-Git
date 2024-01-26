@@ -228,27 +228,69 @@ trans_cts_mean %>%
 # 1. measuring geometric distance or correlation distance matrix
 # 2. 
 
-# clustering 
+# clustering of genes based on the pattern of expression 
+# is used to check if all the subst of genes follow the same expression pattern
 trans_cts<-read_csv("data_rnaseq/counts_transformed.csv")
-# 1. crreate a matrix of counts 
+
+# 1. create a matrix of counts 
 hclust_matrx<-trans_cts %>% 
   select(-gene) %>% 
   as.matrix()
-rownames(hclust_matrx) <-trans_cts$gene
+rownames(hclust_matrx) <- trans_cts$gene
 hclust_matrx<-hclust_matrx[candidate_gene,]
 
 dim(hclust_matrx)
 
-
-
 # z score transform and transpose it
 hclust_matrx<-hclust_matrx %>% 
+  # transpose the matrix so gens are as columns
   t() %>% 
+  # apply scaling to each coulumn of the matrix(genes)
   scale() %>% 
+  # transpose back to genes are as row 
   t()
-
 dim(hclust_matrx)
+
 # 2. calculate distance matrix for the candidate gene
+# to do clustering we need to understand the pairwise or gene wise distances bet
+
+gene_dist<-dist(hclust_matrx)
+#### hierachial clustering 
+gene_hclust<-hclust(gene_dist, method= "complete")
+
+plot (gene_hclust, lables=F)
+abline(h=10, col="brown", lwd=2)
+
+#### another : make  clusters based on the number I want  (k+ number of clusters)
+
+cutree(gene_hclust, k=5)
+
+####
+
+gene_cluster<-cutree(gene_hclust, k=5) %>% 
+  enframe() %>% 
+  rename(gene=name, cluster=value)
+
+### inner_join : joins only values in the twpo tables
+trans_cts_cluster<-trans_cts_mean %>% 
+  inner_join(gene_cluster, by="gene")
+
+
+##### plot the visualization for clusters 
+trans_cts_cluster %>% 
+  ggplot(aes(x=minute, y=mean_cts_scaled))+
+  geom_line(aes(group=gene)) +
+  facet_grid(cols = vars(cluster), rows=vars(strain))
+
+
+####### 
+library(ComplexHeatmap)
+
+Heatmap(hclust_matrx, show_row_names = F)
+
+##########################################
+##########################################
+        end !!!
 
 
 
