@@ -18,20 +18,19 @@ trans_cts_long <-full_join(trans_cts_long, sample_info, by= "sample")
 trans_cts_long %>% 
   ggplot(aes(x=cts)) +
   geom_freqpoly() 
+
 ####### separated by replicate 
 trans_cts_long %>%
   ggplot(aes(x=cts, color=replicate)) +
   geom_freqpoly(binwidth=1) # use to adjust the binwidth
 
 ##### separate the plot based on the strain and teh time point using facet.grid
-
 trans_cts_long %>%
   ggplot(aes(x=cts, color=replicate)) +
   geom_freqpoly(binwidth=1) +
   facet_grid(rows = vars(strain), cols=vars(minute))
 
 ##### challenge 1
-
 raw_cts_long<-raw_cts %>% 
   pivot_longer(names_to = "sample", values_to = "cts", cols = wt_0_r1:mut_180_r3)
 
@@ -55,12 +54,13 @@ raw_cts_long %>%
   facet_grid(rows = vars(strain), cols=vars(minute))
 
 
-########## transform it log since the first polygon ius notb informative 
+########## transform it to log since the first polygon is not informative 
 raw_cts_long %>%
   ggplot(aes(x=cts, color=replicate)) +
   geom_freqpoly() +
   facet_grid(rows = vars(strain), cols=vars(minute)) +
   scale_x_log10()
+
 ######### log transform the counts 
 raw_cts_long %>%
   ggplot(aes(x=log10(cts), colour=replicate))+
@@ -68,7 +68,7 @@ raw_cts_long %>%
   facet_grid(rows = vars(strain), cols=vars(minute))
 
 #########remove the 645 warning messages, are due to zero values in the data 
-#r considers log zero as an infinitive and it will pop ist as an infinite value and will not be plotted 
+#r considers log zero as an infinitive and it will pop is as an infinite value and will not be plotted 
 log10(1) #in this situation we can change zero values to an artificial 1 and convert it to log10
 log10(0)
 
@@ -85,14 +85,14 @@ raw_cts_long %>%
   facet_grid(rows = vars(strain), cols=vars(minute))
 
 ########## instead of the frequency polygon lets try a box plot, box plot need box x and y-axis
-# factor minute(): is used to chnage numerics to factor, coa it is a must 
-# the color in histogram should be chnaged to fill function in the box plot 
+# factor minute(): is used to change numeric to factor, coz it is a must 
+# the color in histogram should be changed to fill function in the box plot 
 raw_cts_long %>%
   ggplot(aes(x=factor(minute), y=log10(cts+1), fill=strain))+
   geom_boxplot() +
   facet_grid(cols=vars(replicate)) 
 
-######### sactter plot : correlation between wt sample at T0 and T30
+######### scatter plot : correlation between wt sample at T0 and T30
 # using wide table is nice 
 trans_cts %>% 
   ggplot(aes(x=wt_0_r1, y=wt_30_r1))+
@@ -105,15 +105,15 @@ trans_cts %>%
   geom_point() +
   geom_abline(colour="brown")
 
-########## to look at the correlation of count data across all samples in our expreiment 
-
+########## to look at the correlation of count data across all samples in our experiment 
 trans_cts_corr<-trans_cts %>% 
   select(-gene) %>% 
   cor(method = "spearman")
   
 ####### to plot a correlation plot 
 library(corrr) 
-####### hreatmap
+
+####### heatmap
 rplot(trans_cts_corr)
 
 ####### to make the x-axis readable 
