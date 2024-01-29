@@ -2,15 +2,15 @@
 ################################# 
 #################################
 # PCA and how is it used in the analyses 
-# PCA: is demionstionality rredcuction technique 
-# the varition is explained by variance and it is used to classify gennercs based on thier relevalmnce 
+# PCA: is dimensional reduction technique 
+# the variation is explained by variance and it is used to classify Jenner based on their relevance 
 # variance: how spread two points are 
-# it tries to captutre the variance in the best representative way
-# eigen vectors are used in PCA
-# the number of pPCA's are the number of dimension that we have 
-# the numebr of pCA is determined by the data 
-# the sacle is the square of standard devaitions 
-# Eigen values are the squre roots of Sds
+# it tries to capture the variance in the best representative way
+# Eigen vectors are used in PCA
+# the number of PCA's are the number of dimension that we have 
+# the number of pCA is determined by the data 
+# the scale is the square of standard deviations 
+# Eigen values are the square roots of Sds
 # pca can't count missing data
 
 
@@ -25,10 +25,10 @@ sample_info<-read_csv("data_rnaseq/sample_info.csv")
 
 pca_matix<-trans_cts %>% 
   column_to_rownames("gene") %>% 
-  # as matrix convers the data to matrix
+  # as matrix converts the data to matrix
   as.matrix() %>% 
   t()   
-# t () transpose matix 
+# t () transpose matrix 
 
 ##### run PCA
 sample_pca<-prcomp(pca_matix)
@@ -42,7 +42,7 @@ pca_matix[1:10, 1:5]
 as_tibble(pca_matix)
 as_tibble(pca_matix, rownames("sample"))
 
-#### eigen values
+#### compute eigenvalue 
 pc_eigenvalues<-sample_pca$sdev^2
 
 # create table to plot 
@@ -51,16 +51,26 @@ pc_eigenvalues<-tibble(pc=factor(1:length(pc_eigenvalues)),
   mutate(pct=variance/sum(variance)*100) %>% 
   mutate(pct_cum=cumsum(pct))
 
+# the following function can be used to generate eigenvalues 
+pc_eigenvalues2 <- tibble(pc = factor(seq(1, 36)), pc_eigenvalues=sample_pca$sdev^2, 
+  variance = pc_eigenvalues) %>% 
+  mutate(pct = variance / sum(variance) * 100) %>% 
+  mutate(pct_cum = cumsum(pct))
+
+pc_eigenvalues2<-pc_eigenvalues2 [,-2]
+
 ###### pareto plot/chart is a combination of 
 pc_eigenvalues %>% 
   ggplot(aes(x=pc)) +
   geom_col(aes(y=pct)) +
   geom_line(aes(y=pct_cum, group=1)) +
   geom_point(aes(y=pct_cum)) +
-  # to know the number of PCAs that explain 90% of theb variance
-  #geom_hline(yintercept = 90) +
+  # to know the number of PCAs that explain 90% of the variance
+  geom_hline(yintercept = 90, color="red") +
+  geom_vline(xintercept = 14, color="green")+
   labs(x="principal component", y="Fraction variance explained")
   
+
 ######## visualize 
 pc_scores<-sample_pca$x%>% 
   as_tibble(rownames="sample")
@@ -84,7 +94,7 @@ pca_plot<-pc_scores %>%
 pc_loadings<-sample_pca$rotation %>% 
 as_tibble(rownames="gene")
 
-top_genes<-pc_loadings%>% 
+top_genes<-as.data.frame(pc_loadings)%>% 
   select(gene, PC1, PC2) %>% 
   pivot_longer(matches("PC"), names_to = "PC", values_to = "loading") %>% 
   group_by(PC) %>% 
@@ -103,13 +113,21 @@ loadings_plot<-ggplot(data=pc_loadings) +
   geom_text(aes(x=PC1, y=PC2, label=gene),
             nudge_y = 0.005, size=3) +
   scale_x_continuous(expand = c(0.02, 0.02))
-# creating pappers with multiple pannel
 
+# creating plots with multiple pannel
 library(patchwork)
 
 (pca_plot|pca_plot|pca_plot/loadings_plot) +
   plot_annotation(tag_levels = "A")
 
+(pca_plot|pca_plot/loadings_plot) +
+  plot_annotation(tag_levels = "A")
+
+
+(pca_plot|loadings_plot) +
+  plot_annotation(tag_levels = "A")
+
+##############
 library(ggfortify)
 autoplot(sample_pca)
 
@@ -138,7 +156,7 @@ test_result<-read_csv("data_rnaseq/test_result.csv")
 # basMean column-> normalized expression of a gene
 #log2Foldachnage column-> amount of change between two conditions 
 # lfcSE column-> standard error associated to log2FoldCahnge value 
-# star column -> statistics value compurted as log2FoldChange/lfcSE compared to the stamndard normal distribution
+# stat column -> statistics value compurted as log2FoldChange/lfcSE compared to the standard normal distribution
 # pvalue-> p-value associated with the change 
 # padj-> p-value corrected for multiple hypothesis testing
 # comparison-> comparison group
@@ -174,14 +192,14 @@ ma_plot<-test_result %>%
 ### combining two plots 
 (ma_plot|pca_plot)
 
-##### genes significantly associaeted or candidate genes 
+##### genes significantly associated or candidate genes 
 
 
-# visualizing expresssion trends 
+# visualizing expression trends 
 # step 1: to get candidate genes (aka padj<0.01)
 candidate_gene<-test_result %>% 
   filter(padj<0.01) %>% 
-  pull(gene) %>% # test_results [, "gene] aka test_result$gene: extraxts one column in to a vector 
+  pull(gene) %>% # test_results [, "gene] aka test_result$gene: extracts one column in to a vector 
   unique()
 # 1a. get the trans_cts_long
 trans_cts_long<-trans_cts %>% 
@@ -283,7 +301,8 @@ trans_cts_cluster %>%
   facet_grid(cols = vars(cluster), rows=vars(strain))
 
 
-####### 
+####### To commpute a HeatMap
+BiocManager::install("ComplexHeatmap")
 library(ComplexHeatmap)
 
 Heatmap(hclust_matrx, show_row_names = F)
