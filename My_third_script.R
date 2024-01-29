@@ -43,6 +43,7 @@ surveys[,-1]# gives all data exept first column
 surveys [,"sex" ] # to choose sex 
 surveys["sex"]
 surveys$plot_id
+surveys$sex
 
 ###### challenge 
 surveys_200<-surveys[200,] # only data chose the 200th raw
@@ -76,6 +77,7 @@ summary(surveys$taxa)
 
 surveys$genus<- factor(surveys$genus)
 nlevels(surveys$genus)# 26 genus
+levels(surveys$genus)
 
 ######## convert factors
 as.character(sex)
@@ -103,7 +105,7 @@ plot(sex)
 levels(sex) [1:2]<-c("female","male")
 plot(sex)
 
-sex<-factor(sex, levels=c("undetermined","female" , "male")) # used to rearrange the order of the levels or charcters 
+sex<-factor(sex, levels=c("undetermined","female" , "male")) # used to rearrange the order of the levels or charterers 
 
 plot(sex)
 
